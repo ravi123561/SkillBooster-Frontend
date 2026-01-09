@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skill Difficulty Rating</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .rating-stars i {
+      font-size: 24px;
+      color: gray;
+      cursor: pointer;
+    }
+    .rating-stars i.active {
+      color: gold;
+    }
+  </style>
+</head>
+<body style="background-image: url('/assets/rating.jpg'); background-size: cover; background-repeat: no-repeat;">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="dashboard.html">SkillBooster</a>
+    <div class="d-flex">
+      <a href="dashboard.html" class="btn btn-outline-light me-2">Dashboard</a>
+      <button class="btn btn-outline-light" onclick="logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<script>
+  if(localStorage.getItem("loggedIn")!=="true"){
+      window.location.href = "index.html";
+  }
+  function logout(){
+      localStorage.removeItem("loggedIn");
+      window.location.href = "index.html";
+  }
+</script>
+
+
+  <div class="container mt-5">
+    <h2 class="mb-4">⭐ Skill Difficulty Rating</h2>
+    <p>Rate how tough a skill feels and track your challenge level.</p>
+
+    <form id="ratingForm">
+      <div class="mb-3">
+        <label for="skillName" class="form-label">Skill Name:</label>
+        <input type="text" class="form-control" id="skillName" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Difficulty Rating:</label>
+        <div class="rating-stars" id="stars">
+          <i class="bi bi-star" data-value="1"></i>
+          <i class="bi bi-star" data-value="2"></i>
+          <i class="bi bi-star" data-value="3"></i>
+          <i class="bi bi-star" data-value="4"></i>
+          <i class="bi bi-star" data-value="5"></i>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-success">Save Rating</button>
+    </form>
+
+    <div id="ratingResult" class="mt-4"></div>
+  </div>
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <script>
+    let selectedRating = 0;
+
+    document.querySelectorAll('#stars i').forEach(star => {
+      star.addEventListener('click', () => {
+        selectedRating = parseInt(star.getAttribute('data-value'));
+        document.querySelectorAll('#stars i').forEach(s => {
+          s.classList.remove('active');
+          if (parseInt(s.getAttribute('data-value')) <= selectedRating) {
+            s.classList.add('active');
+          }
+        });
+      });
+    });
+
+    document.getElementById('ratingForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const skill = document.getElementById('skillName').value;
+      const result = document.getElementById('ratingResult');
+
+      if (selectedRating === 0) {
+        result.innerHTML = '<div class="alert alert-warning">Please select a rating.</div>';
+        return;
+      }
+
+      result.innerHTML = `<div class="alert alert-info">You rated <strong>${skill}</strong> as <strong>${selectedRating}/5</strong> in difficulty.</div>`;
+    });
+  </script>
+</body>
+</html>
