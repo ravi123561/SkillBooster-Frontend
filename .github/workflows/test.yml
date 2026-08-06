@@ -1,50 +1,50 @@
-name: PureAgile Deployment Test
+name: PureAgile Pipeline Test
 
 on:
-  push:
-    branches:
-      - main
-
   workflow_dispatch:
     inputs:
-      should_fail:
-        description: "Fail workflow to test On Failure status mapping"
+      fail_stage:
+        description: "Stage to fail"
         required: true
-        default: "false"
+        default: "none"
         type: choice
         options:
-          - "false"
-          - "true"
+          - none
+          - build
+          - test
+          - deploy
 
 jobs:
-  pureagile-deployment-test:
-    name: PureAgile Deployment Test
+  pipeline:
+    name: Pipeline Started
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - run: echo "Pipeline started"
 
-      - name: Print work item context
-        run: |
-          echo "Testing PureAgile deployment tracking"
-          echo "Commit SHA: $GITHUB_SHA"
-          echo "Branch: $GITHUB_REF_NAME"
-          echo "Workflow: $GITHUB_WORKFLOW"
-          echo "Run ID: $GITHUB_RUN_ID"
+  build:
+    name: Build
+    needs: pipeline
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Build started"
+      - if: ${{ inputs.fail_stage == 'build' }}
+        run: exit 1
 
-      - name: Simulate deployment started
-        run: |
-          echo "Deployment started for PureAgile test"
-          sleep 5
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Test started"
+      - if: ${{ inputs.fail_stage == 'test' }}
+        run: exit 1
 
-      - name: Simulate successful deployment
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.should_fail == 'false' }}
-        run: |
-          echo "Deployment completed successfully"
-
-      - name: Simulate failed deployment
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.should_fail == 'true' }}
-        run: |
-          echo "Deployment failed intentionally for PureAgile test"
-          exit 1
+  deploy:
+    name: Deploy Dev
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploy started"
+      - if: ${{ inputs.fail_stage == 'deploy' }}
+        run: exit 1
+      - run: echo "Deploy succeeded"
