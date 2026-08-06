@@ -1,17 +1,50 @@
-
-name: Test Workflow
+name: PureAgile Deployment Test
 
 on:
   push:
     branches:
       - main
 
+  workflow_dispatch:
+    inputs:
+      should_fail:
+        description: "Fail workflow to test On Failure status mapping"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
 jobs:
-  test:
+  pureagile-deployment-test:
+    name: PureAgile Deployment Test
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Print Message
-        run: echo "Workflow is working!"
+      - name: Print work item context
+        run: |
+          echo "Testing PureAgile deployment tracking"
+          echo "Commit SHA: $GITHUB_SHA"
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Workflow: $GITHUB_WORKFLOW"
+          echo "Run ID: $GITHUB_RUN_ID"
+
+      - name: Simulate deployment started
+        run: |
+          echo "Deployment started for PureAgile test"
+          sleep 5
+
+      - name: Simulate successful deployment
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.should_fail == 'false' }}
+        run: |
+          echo "Deployment completed successfully"
+
+      - name: Simulate failed deployment
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.should_fail == 'true' }}
+        run: |
+          echo "Deployment failed intentionally for PureAgile test"
+          exit 1
