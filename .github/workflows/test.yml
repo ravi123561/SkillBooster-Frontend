@@ -1,10 +1,14 @@
-name: PureAgile Pipeline Test
+name: PureAgile Stage Pipeline Test
 
 on:
+  push:
+    branches:
+      - main
+
   workflow_dispatch:
     inputs:
       fail_stage:
-        description: "Stage to fail"
+        description: "Select which stage should fail"
         required: true
         default: "none"
         type: choice
@@ -15,36 +19,71 @@ on:
           - deploy
 
 jobs:
-  pipeline:
+  pipeline-start:
     name: Pipeline Started
     runs-on: ubuntu-latest
+
     steps:
-      - run: echo "Pipeline started"
+      - name: Start pipeline
+        run: |
+          echo "Pipeline started for PureAgile"
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Commit: $GITHUB_SHA"
 
   build:
     name: Build
-    needs: pipeline
+    needs: pipeline-start
     runs-on: ubuntu-latest
+
     steps:
-      - run: echo "Build started"
-      - if: ${{ inputs.fail_stage == 'build' }}
-        run: exit 1
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build started
+        run: echo "Build started"
+
+      - name: Simulate build failure
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.fail_stage == 'build' }}
+        run: |
+          echo "Build failed intentionally"
+          exit 1
+
+      - name: Build succeeded
+        run: echo "Build succeeded"
 
   test:
     name: Test
     needs: build
     runs-on: ubuntu-latest
-    steps:
-      - run: echo "Test started"
-      - if: ${{ inputs.fail_stage == 'test' }}
-        run: exit 1
 
-  deploy:
+    steps:
+      - name: Test started
+        run: echo "Test started"
+
+      - name: Simulate test failure
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.fail_stage == 'test' }}
+        run: |
+          echo "Test failed intentionally"
+          exit 1
+
+      - name: Test succeeded
+        run: echo "Test succeeded"
+
+  deploy-dev:
     name: Deploy Dev
     needs: test
     runs-on: ubuntu-latest
+    environment: dev
+
     steps:
-      - run: echo "Deploy started"
-      - if: ${{ inputs.fail_stage == 'deploy' }}
-        run: exit 1
-      - run: echo "Deploy succeeded"
+      - name: Deploy started
+        run: echo "Deploy dev started"
+
+      - name: Simulate deploy failure
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.fail_stage == 'deploy' }}
+        run: |
+          echo "Deploy failed intentionally"
+          exit 1
+
+      - name: Deploy succeeded
+        run: echo "Deploy dev succeeded"
