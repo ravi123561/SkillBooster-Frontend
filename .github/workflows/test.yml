@@ -19,20 +19,8 @@ on:
           - deploy
 
 jobs:
-  pipeline-start:
-    name: Pipeline Started
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Start pipeline
-        run: |
-          echo "Pipeline started for PureAgile"
-          echo "Branch: $GITHUB_REF_NAME"
-          echo "Commit: $GITHUB_SHA"
-
   build:
     name: Build
-    needs: pipeline-start
     runs-on: ubuntu-latest
 
     steps:
