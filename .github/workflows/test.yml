@@ -22,7 +22,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -38,12 +37,14 @@ jobs:
 
       - name: Build succeeded
         run: echo "Build succeeded"
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
-
+    needs: build
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Lint started
         run: echo "Running lint checks..."
@@ -55,10 +56,12 @@ jobs:
     name: Security Scan
     needs: lint
     runs-on: ubuntu-latest
-
     steps:
       - name: Security scan started
         run: echo "Scanning for vulnerabilities..."
+
+      - name: Sonar Scan
+        run: echo "Running sonar scan..."
 
       - name: Security scan completed
         run: echo "No vulnerabilities found"
@@ -67,10 +70,12 @@ jobs:
     name: Test
     needs: build
     runs-on: ubuntu-latest
-
     steps:
       - name: Test started
         run: echo "Test started"
+
+      - name: Run Jest
+        run: npm test -- --passWithNoTests
 
       - name: Simulate test failure
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.fail_stage == 'test' }}
@@ -83,10 +88,11 @@ jobs:
 
   deploy-dev:
     name: Deploy Dev
-    needs: test
+    needs:
+      - test
+      - security-scan
     runs-on: ubuntu-latest
     environment: dev
-
     steps:
       - name: Deploy started
         run: echo "Deploy dev started"
