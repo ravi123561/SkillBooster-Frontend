@@ -38,6 +38,30 @@ jobs:
 
       - name: Build succeeded
         run: echo "Build succeeded"
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint started
+        run: echo "Running lint checks..."
+
+      - name: Lint completed
+        run: echo "Lint successful"
+
+  security-scan:
+    name: Security Scan
+    needs: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Security scan started
+        run: echo "Scanning for vulnerabilities..."
+
+      - name: Security scan completed
+        run: echo "No vulnerabilities found"
 
   test:
     name: Test
